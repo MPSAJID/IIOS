@@ -17,13 +17,125 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role     @default(student)
+  role      Role     @default(user)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Application Application[]
+
+  Order Order[]
+
+  OnlineCoursePurchase OnlineCoursePurchase[]
 }
 
 enum Role {
+  user
   admin
   student
   lecturer
+}
+
+model Lecturer {
+  id        String   @id @default(uuid())
+  name      String
+  bio       String
+  subject   String
+  photoUrl  String
+  createdAt DateTime @default(now())
+
+  Course Course[]
+
+  OnlineCourse OnlineCourse[]
+}
+
+model Course {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  duration    String
+  lecturer    Lecturer  @relation(fields: [lecturerId], references: [id])
+  lecturerId  String
+
+  Application Application[]
+}
+
+
+model OnlineCourse {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  duration    String
+  lecturer    Lecturer @relation(fields: [lecturerId], references: [id])
+  lecturerId  String
+  createdAt   DateTime @default(now())
+
+  Purchases   OnlineCoursePurchase[]
+}
+
+model OnlineCoursePurchase {
+  id              String       @id @default(uuid())
+  user            User         @relation(fields: [userId], references: [id])
+  userId          Int
+  onlineCourse    OnlineCourse @relation(fields: [onlineCourseId], references: [id])
+  onlineCourseId  String
+  purchasedAt     DateTime     @default(now())
+}
+
+
+model Scholarship {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  eligibility String
+  deadline    DateTime
+
+  Application Application[]
+}
+
+
+
+model Message {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Book {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  price       Float
+  stock       Int
+  coverUrl    String
+  description String
+
+  Order Order[]
+}
+
+
+model Application {
+  id             String      @id @default(uuid())
+  user           User        @relation(fields: [userId], references: [id])
+  userId         Int
+  course         Course?     @relation(fields: [courseId], references: [id])
+  courseId       String?
+  scholarship    Scholarship?@relation(fields: [scholarshipId], references: [id])
+  scholarshipId  String?
+  status         String      @default("pending")
+  appliedAt      DateTime    @default(now())
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    String
+  quantity  Int
+  total     Float
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
 }
